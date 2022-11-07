@@ -54,7 +54,35 @@ index = 1;
 %NOW HAVE TO DETERMINE THE WIDTH
 % Loop through the array of peaks location using index
 
-
+while (index <= length(locs))
+ % Odd indices to calculate black regions easily
+    if(mod(index,2) ~= 0)
+        black_region = locs(index) - start;
+        
+        % Calculate total region
+        % if next index is out of bound, use size of matrix to calculate
+        % total region. Otherwise calculate using next or even index.
+        if(index + 1 > length(locs))
+            total_region = size - start;
+        else
+            total_region = locs(index + 1) - start;
+        end
+        
+        % ratio either 2:3 ('1') or 1:3 ('0')
+        ratio = black_region / total_region; 
+        fprintf("%f\n",ratio);
+        if(ratio < 0.55)
+            binary_str = append(binary_str, "0");
+        else
+            binary_str = append(binary_str, "1");
+        end
+    else
+        % Even indices are starting point for each region
+        start = locs(index);
+    end
+    index = index + 1;    
+end
+fprintf(binary_str);
 
 
 
