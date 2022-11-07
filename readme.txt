@@ -1,5 +1,6 @@
 alright this assignment was pretty confusing, but the basic premise is:
-1. have your robot read a barcode 
+1. have your robot read a barcode, the sizes of the barcode can vary, and as of right now our robot can only handle BCDEF,
+    not A because it's too small and hard to read
 2. save that data to a .csv file
 3. now the data will be very choppy or "noisy" is what they call it
 4. we turn the graph into an array and smoothen it
