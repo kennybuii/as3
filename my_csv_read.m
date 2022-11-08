@@ -2,7 +2,7 @@
 clc;
 clear;
 close all;
-array = csvread('B.csv');
+array = csvread('E.csv');
 colorArray = array(:,4);
 %plot(colorArray);
 %hold on
@@ -55,11 +55,11 @@ while (index <= length(locs))
     barWidth = locs(index) - locs(index-1); % width of a single bar
     %fprintf("bar width: %f\n", barWidth);
     ratio = barWidth / total * 100; % compare single bar to the whole graph
-    %fprintf("%f\n", ratio);
+    fprintf("%f\n", ratio);
     index = index + 1;
 
     %MAY NEED TO ADJUST THIS VALUE
-    if (ratio < 1.0) %arbitrary value, but if ratio > 1.0, that means its a thin bar
+    if (ratio < 1.31) %arbitrary value, but if ratio > 1.0, that means its a thin bar
         binary_str = append(binary_str, "1");
     else %otherwise, that means its a thick bar
         binary_str = append(binary_str, "3");
