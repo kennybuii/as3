@@ -10,8 +10,8 @@ colorArray = array(:,4);
 %Assume window size of 20
 ws = 20;
 
-%THIS SMOOTHENS THE GRAPH
 % Calculating average of window size, looping through the entire CSV file
+% and smoothening out the graph
 for i = 1: length(colorArray)-ws
     colorArrayAvg(i)= sum(colorArray(i:i+ws))/ws;
     %fprintf('%f \n', colorArrayAvg(i));
@@ -19,7 +19,6 @@ end
 %plot(colorArrayAvg);
 %hold on
 
-%THIS FINDS CHANGE IN THE GRAPH, WILL RESULT IN PEAKS
 % Calculating derivative of previously calculated averages
 for i = 1:length(colorArrayAvg)-1
     colorDerivative(i) = abs(colorArrayAvg(i+1) - colorArrayAvg(i));
@@ -28,7 +27,6 @@ end
 %plot(colorDerivative);
 %hold on
 
-%THIS SMOOTHENS THE PEAKS
 %Smoothening derivative out, similar to what we did for colorArrayAvg
 for i = 1: length(colorDerivative)-ws
     colorDerAvg(i)= sum(colorDerivative(i:i+ws))/ws;
@@ -37,52 +35,70 @@ end
 %plot(colorDerAvg);
 %hold off
 
-%THIS STORES THE PEAKS AND THE RESPECTIVE INDICES
 % Find the peaks of the derivative, minimum distance between peaks = 10,
 % minimum height for peak = 1
+
 [pks,locs] = findpeaks(colorDerAvg, 'MinPeakDistance',10, 'MinPeakHeight', 1);
 
-g=sprintf("%d ", locs);
-fprintf("%s\n", g);
+%g=sprintf("%d ", locs);
+%fprintf("%s\n", g);
 
-% starting point of each section in the matrix that represents a number, gets updated in each loop
-start = 0;
-size = length(colorArray); % total length of matrix or number of rows in CSV
 binary_str = ""; % string that will store the binary representation of data
-index = 1;
-
+index = 2; % start at 2 because we are comparing against previous value
+total = sum(locs(1:length(locs))); % total area of all of the peaks (the whole graph)
+%fprintf("%f\n", total);
 %NOW HAVE TO DETERMINE THE WIDTH
 % Loop through the array of peaks location using index
 
 while (index <= length(locs))
- % Odd indices to calculate black regions easily
-    if(mod(index,2) ~= 0)
-        black_region = locs(index) - start;
-        
-        % Calculate total region
-        % if next index is out of bound, use size of matrix to calculate
-        % total region. Otherwise calculate using next or even index.
-        if(index + 1 > length(locs))
-            total_region = size - start;
-        else
-            total_region = locs(index + 1) - start;
-        end
-        
-        % ratio either 2:3 ('1') or 1:3 ('0')
-        ratio = black_region / total_region; 
-        fprintf("%f\n",ratio);
-        if(ratio < 0.55)
-            binary_str = append(binary_str, "0");
-        else
-            binary_str = append(binary_str, "1");
-        end
-    else
-        % Even indices are starting point for each region
-        start = locs(index);
-    end
-    index = index + 1;    
+    
+    barWidth = locs(index) - locs(index-1); % width of a single bar
+    %fprintf("bar width: %f\n", barWidth);
+    ratio = barWidth / total * 100; % compare single bar to the whole graph
+    %fprintf("%f\n", ratio);
+    index = index + 1;
+
+    %MAY NEED TO ADJUST THIS VALUE
+    if (ratio < 1.0) %arbitrary value, but if ratio > 1.0, that means its a thin bar
+        binary_str = append(binary_str, "1");
+    else %otherwise, that means its a thick bar
+        binary_str = append(binary_str, "3");
+    end % the reason we use ratios here is because each graph is gonna have different values,
+        % so can't use hardcoded comparisons or comparisons that would only work for 1 graph 
 end
-fprintf(binary_str);
 
-
+fprintf("Binary string: %s\n", binary_str);
+% look up table
+LOOKUPTABLE = [311113113 ;  %A
+               113113113; %B
+               313113111; %C
+               111133113; %D
+               311133111; %E
+               113133111; %F
+               111113313; %G
+               311113311; %H
+               113113311; %I
+               111133311; %J
+               311111133; %K
+               113111133; %L
+               313111131; %M
+               111131133; %N
+               311131131; %O
+               113131131; %P
+               111111333; %Q
+               311111331; %R
+               113111331; %S
+               111131331; %T
+               331111113; %U
+               133111113; %V
+               333111111; %W
+               131131113; %X
+               331131111; %Y
+               133131111; %Z
+               ]; 
+           
+CODE = str2num(binary_str); %turn string to number 
+coor = find(LOOKUPTABLE == CODE); %compare number to lookuptable
+Letter = char(64+coor); % turn to ASCII letter
+fprintf(Letter);
 
